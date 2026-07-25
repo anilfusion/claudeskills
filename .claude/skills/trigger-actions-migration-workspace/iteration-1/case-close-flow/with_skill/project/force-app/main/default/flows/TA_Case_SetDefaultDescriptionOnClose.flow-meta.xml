@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>60.0</apiVersion>
+    <environments>Default</environments>
+    <interviewLabel>TA Case: Set Default Description On Close {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>TA Case: Set Default Description On Close</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <status>Active</status>
+
+    <variables>
+        <name>record</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
+        <objectType>Case</objectType>
+    </variables>
+    <variables>
+        <name>recordPrior</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Case</objectType>
+    </variables>
+
+    <!--
+      The "did Status become Closed?" decision from the original native record-triggered flow
+      has been moved to Entry_Criteria__c on the Trigger_Action.Case_SetDefaultDescriptionOnClose
+      customMetadata record (record.Status = "Closed" && recordPrior.Status != "Closed"), per
+      framework-overview.md guidance to prefer entry criteria over an in-flow Decision element
+      when the whole flow body is otherwise a single conditional on record/recordPrior fields.
+      This flow is only invoked for records that already satisfy that condition, so it contains
+      just the field assignment.
+    -->
+    <assignments>
+        <name>Set_Default_Description</name>
+        <label>Set Default Description</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <assignmentItems>
+            <assignToReference>record.Description</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Closed via automated follow-up process.</stringValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Set_Default_Description</targetReference>
+        </connector>
+    </start>
+</Flow>

@@ -1,0 +1,58 @@
+{
+  "skill_name": "trigger-actions-migration",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "closed-opportunity-trigger",
+      "prompt": "In this SFDX project (force-app/main/default), we have ClosedOpportunityTrigger.trigger on Opportunity. It has no helper class - the logic is inline in the trigger body, duplicated across the after-insert and after-update contexts (create a follow-up Task when an Opportunity's Stage is/becomes 'Closed Won'). We've already got the Trigger Actions Framework installed in this project (see classes/MetadataTriggerHandler.cls, objects/Trigger_Action__mdt, etc.) and want to migrate this trigger's logic into it so it's no longer a one-off trigger. Please do the conversion.",
+      "expected_output": "One (or a small number of) Apex class(es) implementing TriggerAction.AfterInsert and TriggerAction.AfterUpdate, deduplicating the 'create follow-up Task when Closed Won' logic instead of repeating it. Trigger_Action__mdt customMetadata records (one per context) with correct Apex_Class_Name__c, correct context field pointing at an sObject_Trigger_Setting__mdt record for Opportunity (created if missing), sensible Order__c, and a filled-in Description__c. The old ClosedOpportunityTrigger.trigger body is replaced with (or folded into) the MetadataTriggerHandler bootstrap call rather than left with duplicate active logic. A summary explaining what was done.",
+      "files": [],
+      "assertions": [
+        "A new Apex class exists (outside the framework's own bundled classes) implementing TriggerAction.AfterInsert",
+        "That class (or a class implementing TriggerAction.AfterUpdate) also implements TriggerAction.AfterUpdate -- the after-insert and after-update paths are not two separate unrelated classes duplicating the same Task-creation logic",
+        "The Task-creation code (Subject = 'Follow Up Test Task') appears in the new Apex source only once (as a shared method), not copy-pasted twice the way the original trigger had it",
+        "At least one new Trigger_Action__mdt customMetadata XML record exists under force-app/main/default/customMetadata referencing the new Apex class via Apex_Class_Name__c",
+        "The generated Trigger_Action__mdt record(s) populate Order__c",
+        "The generated Trigger_Action__mdt record(s) populate Description__c with a non-empty, meaningful description",
+        "An sObject_Trigger_Setting__mdt customMetadata record exists for Opportunity (Object_API_Name__c = Opportunity)",
+        "ClosedOpportunityTrigger.trigger no longer contains the original inline Task-creation logic -- its body now just delegates to the framework (e.g. calls MetadataTriggerHandler)",
+        "A SUMMARY.md (or equivalent) was produced explaining what was created/changed"
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "restrict-contact-by-name",
+      "prompt": "In this SFDX project (force-app/main/default), we have RestrictContactByName.trigger on Contact (before insert, before update) which adds an error if LastName == 'INVALIDNAME'. We've already got the Trigger Actions Framework installed in this project. Please migrate this into the framework.",
+      "expected_output": "A small, correctly-scoped Apex class implementing TriggerAction.BeforeInsert and TriggerAction.BeforeUpdate (not over-engineered for a one-line validation). Two Trigger_Action__mdt records (one per context) or one record reused appropriately, an sObject_Trigger_Setting__mdt record for Contact if missing, and the old trigger body replaced with the bootstrap call. Should not invent unnecessary complexity (e.g. unnecessary Entry_Criteria__c formula, unnecessary extra classes) for logic this simple.",
+      "files": [],
+      "assertions": [
+        "A new Apex class exists implementing TriggerAction.BeforeInsert and TriggerAction.BeforeUpdate",
+        "The validation logic (LastName == 'INVALIDNAME' with addError) appears only once in the new class, shared across both contexts rather than duplicated",
+        "Exactly one new business-logic Apex class was created for this conversion (not split into multiple classes for what is a single one-line validation -- checks against over-engineering)",
+        "At least one Trigger_Action__mdt customMetadata record references the new class via Apex_Class_Name__c",
+        "An sObject_Trigger_Setting__mdt customMetadata record exists for Contact (Object_API_Name__c = Contact)",
+        "RestrictContactByName.trigger's body no longer contains the original inline validation logic -- it now delegates to the framework",
+        "No Entry_Criteria__c formula was invented for this case where the condition (LastName check) is naturally expressed as a simple in-code guard on a single-purpose class, OR if Entry_Criteria__c was used it correctly reads 'record.LastName' style syntax without breaking the logic",
+        "A SUMMARY.md (or equivalent) was produced explaining what was created/changed"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "case-close-flow",
+      "prompt": "In this SFDX project (force-app/main/default), we have a record-triggered flow flows/Case_Set_Default_Description_On_Close.flow-meta.xml on Case that sets Description to a default value when Status becomes 'Closed'. We've already got the Trigger Actions Framework installed in this project. Please convert this into an auto-launched flow that plugs into the framework instead of being a native record-triggered flow.",
+      "expected_output": "A new auto-launched flow (processType AutoLaunchedFlow) with correctly-configured record (input+output) and recordPrior (input only) variables typed to Case, preserving the same decision logic (Status = Closed and prior Status != Closed) and the same Description assignment. A Trigger_Action__mdt record with Apex_Class_Name__c = TriggerActionFlow, Flow_Name__c pointing at the new flow, correct context (After_Update__c most likely, since the source used RecordAfterSave triggerType with a before/after distinction to determine), an sObject_Trigger_Setting__mdt record for Case if missing. The old record-triggered flow is deactivated (status changed, not deleted), not left running in parallel.",
+      "files": [],
+      "assertions": [
+        "A new flow file exists with <processType>AutoLaunchedFlow</processType>",
+        "The new flow defines a 'record' variable of dataType SObject, objectType Case, isInput true, isOutput true",
+        "The new flow defines a 'recordPrior' variable of dataType SObject, objectType Case, isInput true, isOutput false",
+        "The new flow preserves the original decision logic (Status becomes Closed: current Status = Closed AND prior Status != Closed) and the Description assignment to the same default value",
+        "A Trigger_Action__mdt customMetadata record exists with Apex_Class_Name__c = TriggerActionFlow and Flow_Name__c matching the new flow's API name",
+        "The Trigger_Action__mdt record populates Order__c and a context field (e.g. After_Update__c)",
+        "An sObject_Trigger_Setting__mdt customMetadata record exists for Case (Object_API_Name__c = Case)",
+        "The original native record-triggered flow (Case_Set_Default_Description_On_Close) is deactivated (status changed away from Active) rather than deleted or left Active in parallel with the new flow",
+        "A SUMMARY.md (or equivalent) was produced explaining what was created/changed"
+      ]
+    }
+  ]
+}

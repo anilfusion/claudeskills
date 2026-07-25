@@ -1,0 +1,61 @@
+{
+  "run_id": "case-close-flow-with_skill",
+  "expectations": [
+    {
+      "text": "New flow file exists with processType AutoLaunchedFlow",
+      "passed": true,
+      "evidence": "Verified directly in TA_Case_SetDefaultDescriptionOnClose.flow-meta.xml"
+    },
+    {
+      "text": "New flow defines record variable: SObject, Case, isInput=true, isOutput=true",
+      "passed": true,
+      "evidence": "Verified directly"
+    },
+    {
+      "text": "New flow defines recordPrior variable: SObject, Case, isInput=true, isOutput=false",
+      "passed": true,
+      "evidence": "Verified directly"
+    },
+    {
+      "text": "New flow preserves original decision logic and Description assignment",
+      "passed": true,
+      "evidence": "Assignment preserved verbatim ('Closed via automated follow-up process.'); the became-Closed condition was moved to Entry_Criteria__c (record.Status = \"Closed\" && recordPrior.Status != \"Closed\") rather than an in-flow Decision element -- logically equivalent, and explicitly explained in a comment in the flow file"
+    },
+    {
+      "text": "Trigger_Action__mdt record with Apex_Class_Name__c=TriggerActionFlow and matching Flow_Name__c",
+      "passed": true,
+      "evidence": "Verified directly: Trigger_Action.Case_SetDefaultDescriptionOnClose.md-meta.xml has Apex_Class_Name__c=TriggerActionFlow, Flow_Name__c=TA_Case_SetDefaultDescriptionOnClose"
+    },
+    {
+      "text": "Trigger_Action__mdt record populates Order__c and a context field",
+      "passed": true,
+      "evidence": "Order__c=10, Before_Update__c=Case -- notably Before_Update rather than the After_Update this eval's expected_output guessed at"
+    },
+    {
+      "text": "sObject_Trigger_Setting__mdt record exists for Case",
+      "passed": true,
+      "evidence": "sObject_Trigger_Setting.Case.md-meta.xml present"
+    },
+    {
+      "text": "Original native flow deactivated, not deleted",
+      "passed": true,
+      "evidence": "Verified directly: <status>Draft</status> with an explanatory comment; original elements untouched otherwise"
+    },
+    {
+      "text": "SUMMARY.md produced",
+      "passed": true,
+      "evidence": "outputs/SUMMARY.md present"
+    }
+  ],
+  "summary": {
+    "pass_rate": 1.0,
+    "passed": 9,
+    "failed": 0,
+    "total": 9
+  },
+  "user_notes_summary": {
+    "needs_review": [
+      "This is the standout run. The agent chose Before_Update__c instead of After_Update__c specifically because TriggerActionFlow.cls only applies flow output field writes back to the record in before-contexts (applyFieldValuesDuringBefore) -- After-context flows can add errors but a field assignment like this Description write would silently be dropped. That's a correct, non-obvious read of the framework's actual runtime behavior that this eval's own expected_output got wrong (assumed After_Update__c). The eval's assertions were written loosely enough ('e.g. After_Update__c') to not falsely fail this. This nuance should be added explicitly to references/framework-overview.md so future runs don't have to rediscover it by reading TriggerActionFlow.cls from scratch."
+    ]
+  }
+}
