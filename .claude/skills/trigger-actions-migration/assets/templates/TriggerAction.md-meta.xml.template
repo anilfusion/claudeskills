@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  File name must be: Trigger_Action.{{DeveloperName}}.md-meta.xml
+  Save under:         force-app/main/default/customMetadata/
+
+  Exactly ONE of the seven context fields below should be uncommented/populated per record —
+  one record = one sObject + one trigger context. See references/custom-metadata-schema.md.
+
+  The value of the context field is the DeveloperName of the sObject_Trigger_Setting__mdt
+  record for the target object (NOT the sObject's own API name).
+-->
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" fullName="Trigger_Action.{{DeveloperName}}">
+    <label>{{Label}}</label>
+    <protected>false</protected>
+    <values>
+        <field>Apex_Class_Name__c</field>
+        <value xsi:type="xsd:string">{{ApexClassNameOrTriggerActionFlow}}</value>
+    </values>
+    <values>
+        <field>{{ContextField}}</field>
+        <value xsi:type="xsd:string">{{sObjectTriggerSettingDeveloperName}}</value>
+    </values>
+    <values>
+        <field>Order__c</field>
+        <value xsi:type="xsd:double">{{Order}}</value>
+    </values>
+    <!-- Only for flow actions (Apex_Class_Name__c = TriggerActionFlow) -->
+    <!--
+    <values>
+        <field>Flow_Name__c</field>
+        <value xsi:type="xsd:string">{{FlowApiName}}</value>
+    </values>
+    -->
+    <!-- Optional: gates whether this action runs at all; blank = always runs -->
+    <!--
+    <values>
+        <field>Entry_Criteria__c</field>
+        <value xsi:type="xsd:string">{{FormulaExpression}}</value>
+    </values>
+    -->
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">{{DescriptionOfMigratedLogicAndSourceLocation}}</value>
+    </values>
+</CustomMetadata>
