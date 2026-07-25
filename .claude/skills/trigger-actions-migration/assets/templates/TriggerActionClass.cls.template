@@ -1,0 +1,9 @@
+public class TA_{{Object}}_{{Purpose}} implements TriggerAction.{{Interface}} {
+
+    public void {{contextMethod}}(List<SObject> triggerNew /*, List<SObject> triggerOld*/) {
+        // Narrow to the concrete sObject type, e.g.:
+        // List<{{Object}}> records = (List<{{Object}}>) triggerNew;
+
+        // migrated logic goes here
+    }
+}

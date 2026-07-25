@@ -1,0 +1,23 @@
+@IsTest
+private class TA_{{Object}}_{{Purpose}}Test {
+
+    // The framework's own convention is DML-less trigger testing: call the interface method
+    // directly with in-memory records instead of performing real DML. This is faster and lets
+    // you use TriggerTestUtility.getFakeId(...) to fabricate Ids without an insert. Only fall
+    // back to real DML if the migrated logic itself requires committed/queryable data.
+    @IsTest
+    static void {{scenarioDescription}}() {
+        Id fakeId = TriggerTestUtility.getFakeId({{Object}}.SObjectType);
+        {{Object}} record = new {{Object}}(
+            Id = fakeId
+            // ,set the fields this test scenario needs
+        );
+
+        Test.startTest();
+        new TA_{{Object}}_{{Purpose}}().{{contextMethod}}(new List<{{Object}}>{ record } /*, triggerOld if applicable */);
+        Test.stopTest();
+
+        // assert against `record` directly (e.g. record.hasErrors(), record.getErrors(),
+        // or a field value the method is expected to set)
+    }
+}

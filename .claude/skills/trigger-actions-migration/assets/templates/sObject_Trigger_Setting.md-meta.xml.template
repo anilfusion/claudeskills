@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  File name must be: sObject_Trigger_Setting.{{DeveloperName}}.md-meta.xml
+  Save under:         force-app/main/default/customMetadata/
+
+  One record per sObject that has the framework enabled. Check whether one already exists for
+  this object in the target project before creating a duplicate.
+-->
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" fullName="sObject_Trigger_Setting.{{DeveloperName}}">
+    <label>{{Label}}</label>
+    <protected>false</protected>
+    <values>
+        <field>Object_API_Name__c</field>
+        <value xsi:type="xsd:string">{{ObjectApiNameWithoutNamespace}}</value>
+    </values>
+    <!--
+      Always set explicitly, even for non-namespaced objects (leave the value empty rather than
+      omitting the field). MetadataTriggerHandler's query filters on
+      "Object_Namespace__c = ''" for non-namespaced objects -- an omitted field defaults to NULL,
+      and there is no defaultValue on this field to fall back on, so leaving it out risks the
+      query silently matching zero rows and the framework doing nothing for this sObject.
+      For a managed-package object, put the namespace here instead.
+    -->
+    <values>
+        <field>Object_Namespace__c</field>
+        <value xsi:type="xsd:string">{{NamespaceOrEmptyString}}</value>
+    </values>
+    <!-- Only if any Trigger_Action__mdt record on this object uses Entry_Criteria__c -->
+    <!--
+    <values>
+        <field>TriggerRecord_Class_Name__c</field>
+        <value xsi:type="xsd:string">{{ObjectApiName}}TriggerRecord</value>
+    </values>
+    -->
+</CustomMetadata>

@@ -1,0 +1,10 @@
+// Only needed if a Trigger_Action__mdt record on this sObject uses Entry_Criteria__c.
+// One per sObject — check whether it already exists before generating a duplicate.
+global class {{Object}}TriggerRecord extends TriggerRecord {
+    global {{Object}} record {
+        get { return ({{Object}}) this.newSObject; }
+    }
+    global {{Object}} recordPrior {
+        get { return ({{Object}}) this.oldSObject; }
+    }
+}

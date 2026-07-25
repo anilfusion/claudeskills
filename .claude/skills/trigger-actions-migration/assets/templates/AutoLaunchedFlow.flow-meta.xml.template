@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This is a minimal, valid skeleton for a trigger-action flow: correct processType, correct
+  `record` / `recordPrior` variable contract (see references/framework-overview.md), and a start
+  element wired to a placeholder first element. Add the actual decision/assignment/action
+  elements for the migrated logic, and make sure the start connector's targetReference points at
+  the real first element you add.
+
+  Delete the recordPrior variable block if the source logic only needs the "new" version of the
+  record (insert/undelete contexts). Keep isOutput=false on recordPrior always — the framework
+  never reads an output value back from it.
+-->
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>{{apiVersion}}</apiVersion>
+    <environments>Default</environments>
+    <interviewLabel>{{FlowLabel}} {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>{{FlowLabel}}</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <status>Active</status>
+
+    <variables>
+        <name>record</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
+        <objectType>{{ObjectApiName}}</objectType>
+    </variables>
+    <variables>
+        <name>recordPrior</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <objectType>{{ObjectApiName}}</objectType>
+    </variables>
+
+    <!-- Replace with the real first element of the migrated logic, and add every other
+         decision/assignment/element the source logic needs. -->
+
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>{{FirstElementName}}</targetReference>
+        </connector>
+    </start>
+</Flow>
