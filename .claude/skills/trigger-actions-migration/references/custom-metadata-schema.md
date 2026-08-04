@@ -6,6 +6,47 @@ Exact field API names and types, straight from the framework's own object defini
 `customMetadata` XML records — a typo or wrong type here deploys but silently does nothing at
 runtime (or fails deploy with an unhelpful error).
 
+**These are the vanilla, unprefixed field/object names.** If the target project renamed the
+objects (e.g. `ATFE_Trigger_Action__mdt`), the same prefix applies to every field on that object
+too — confirm the real names from the project's own `objects/*/fields/*.field-meta.xml` before
+generating (see "Before starting" in `SKILL.md`). The semantics and types below still apply
+unchanged; only the literal API name text does.
+
+## Generating valid `customMetadata` XML
+
+Three deploy-blocking mistakes are easy to make by hand and won't show up until deploy:
+
+1. **Declare the `xsi`/`xsd` namespaces on the root element.** Every value uses
+   `<value xsi:type="xsd:string">...</value>` (or `xsd:double`, `xsd:boolean`), but the `xsi` and
+   `xsd` prefixes are **not** implicitly bound — omitting the declarations fails deploy with
+   `The prefix "xsi" for attribute "xsi:type" ... is not bound`. Always start the record:
+
+   ```xml
+   <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                    fullName="{{ObjectDeveloperName}}.{{RecordDeveloperName}}">
+   ```
+
+   Both templates in `assets/templates/` already have this — don't strip it out if free-handing
+   a record instead of starting from the template.
+
+2. **`DeveloperName` (the part of `fullName` after the `ObjectName.` prefix) and `label`
+   (`MasterLabel`) are each capped at 40 characters.** The naming convention
+   (`{sObject}_{WhatItDoes}_{Context}`, e.g. `Account_PriceBookRegionReassignment_BeforeInsert`)
+   blows past this easily once the "what it does" part is descriptive — that example is 48
+   characters and fails deploy with `Value too long for field: fullName maximum length is:40`.
+   **Count both the `fullName` suffix and the `label` before finalizing a record** — a deploy
+   error only reports the first offending field per file, so a record can have both problems and
+   only surface one error per deploy attempt. Abbreviate consistently rather than truncating
+   mid-word: `Control`→`Ctrl`, `Region`→`Rgn`, `Message`→`Msg`, `Account`→`Acct`,
+   `Reassignment`→`Reassign`, `Validation`→`Valid`. Prefer dropping a redundant word entirely
+   (e.g. "For Account" when the object is already Account) over a cryptic abbreviation.
+
+3. **`Object_Namespace__c` (or its renamed equivalent) must be set explicitly, even to an empty
+   string, for non-namespaced objects** — see the field table below for why (an omitted field
+   defaults to NULL, not empty string, and the runtime query filters on empty string).
+
 ## `Trigger_Action__mdt`
 
 One record per discrete action (one Apex class or one flow, in one trigger context, on one
