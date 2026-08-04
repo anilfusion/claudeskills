@@ -32,18 +32,30 @@ start from these rather than free-handing the XML, especially the flow skeleton,
 This skill produces code that depends on the framework's own classes (`MetadataTriggerHandler`,
 `TriggerAction`, `TriggerActionFlow`, `TriggerBase`, `FormulaFilter`, ...) and custom metadata
 types already existing in the target org/project. Check the target SFDX project for these before
-generating anything:
+generating anything — **glob rather than assuming the exact folder name**, since a target project
+may have renamed/prefixed the custom metadata types (e.g. `ATFE_Trigger_Action__mdt` instead of
+`Trigger_Action__mdt`, to avoid clashing with another package or for org naming conventions):
 
 ```
 force-app/main/default/classes/MetadataTriggerHandler.cls
-force-app/main/default/objects/Trigger_Action__mdt/
-force-app/main/default/objects/sObject_Trigger_Setting__mdt/
+force-app/main/default/objects/*Trigger_Action__mdt/
+force-app/main/default/objects/*sObject_Trigger_Setting__mdt/
 ```
 
-If they're missing, say so and ask whether the user wants you to also deploy/vendor the framework
-itself (it can be added as an unlocked package, or its source copied in — see the framework's own
-README for install links) before converting anything. Don't silently invent local copies of the
-framework's classes.
+If they're missing entirely, say so and ask whether the user wants you to also deploy/vendor the
+framework itself (it can be added as an unlocked package, or its source copied in — see the
+framework's own README for install links) before converting anything. Don't silently invent local
+copies of the framework's classes.
+
+**If the objects exist under a non-standard prefix**, that prefix applies to the object API name
+*and* to every one of its custom fields uniformly (e.g. `ATFE_Trigger_Action__mdt` has
+`ATFE_Apex_Class_Name__c`, `ATFE_Order__c`, `ATFE_Flow_Name__c`, ...; `ATFE_sObject_Trigger_Setting__mdt`
+has `ATFE_Object_API_Name__c`, `ATFE_Object_Namespace__c`, ...) — read the actual
+`objects/*/fields/*.field-meta.xml` files to confirm the real field API names rather than assuming
+the unprefixed names in `custom-metadata-schema.md` apply verbatim, then use the discovered
+object/field names throughout every generated `customMetadata` record and in `manifest/package.xml`.
+`custom-metadata-schema.md` documents the field *semantics* and *types*, which don't change —
+only the literal API names might.
 
 ## Workflow
 
